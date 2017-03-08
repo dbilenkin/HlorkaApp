@@ -49,6 +49,10 @@ class PropertyView extends Component {
     return (
       <View style={styles.container}>
         <Text style={styles.description}>{game.name}</Text>
+        { game.players.map((player) => {
+          return <Text key={player.user.id} style={styles.description}>{player.user.login}</Text>
+        })}
+
       </View>
     );
   }

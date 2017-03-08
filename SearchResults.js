@@ -81,6 +81,18 @@ class SearchResults extends Component {
       name: this.props.name,
       games: this.props.games
     };
+    var self = this;
+    this.stompClient.connect({},function(sessionId) {
+        self.stompClient.subscribe('/topic/addGame', function(response) {
+          console.log('This is the body of a message on the subscribed queue:', response);
+          self._addGame(response.body);
+        });
+
+        self.stompClient.subscribe('/topic/deleteGame', function(response) {
+          console.log('This is the body of a message on the subscribed queue:', response);
+          self._deleteGame(response.body);
+        });
+    });
 
     //this.socket = SocketIOClient('http://localhost:8080/topic/game');
     //this.socket.on('game', this._addGame(game));
@@ -100,18 +112,7 @@ class SearchResults extends Component {
 
     //var stompClient = new Stomp('localhost', 8080);
 
-    var self = this;
-    this.stompClient.connect({},function(sessionId) {
-        self.stompClient.subscribe('/topic/addGame', function(response) {
-          console.log('This is the body of a message on the subscribed queue:', response);
-          self._addGame(response.body);
-        });
 
-        self.stompClient.subscribe('/topic/deleteGame', function(response) {
-          console.log('This is the body of a message on the subscribed queue:', response);
-          self._deleteGame(response.body);
-        });
-    });
   }
 
   _addGame(body) {
@@ -155,6 +156,21 @@ class SearchResults extends Component {
     })
   }
 
+  joinGame(id) {
+    var self = this;
+    fetch('http://localhost:8090/api/games/' + id + '/join', {
+      method: 'PUT',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+      },
+      body: this.props.name
+    })
+    .then(function(response) {
+      self.rowPressed(id);
+    })
+  }
+
   renderRow(rowData, sectionID, rowID) {
 
     return (
@@ -162,7 +178,7 @@ class SearchResults extends Component {
         <View>
           <View style={styles.rowContainer}>
             <View  style={styles.flowRight}>
-              <TouchableHighlight onPress={() => this.rowPressed(rowData.id)}
+              <TouchableHighlight onPress={() => this.joinGame(rowData.id)}
                   underlayColor='#dddddd'>
                   <Text style={styles.price}>Join</Text>
               </TouchableHighlight>
