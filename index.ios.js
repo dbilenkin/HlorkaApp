@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { AppRegistry, StyleSheet, NavigatorIOS } from 'react-native';
 
-var SearchPage = require('./SearchPage');
+var Home = require('./app/containers/Home');
 
 var styles = StyleSheet.create({
   container: {
@@ -16,7 +16,7 @@ class HlorkaApp extends React.Component {
         style={styles.container}
         initialRoute={{
           title: 'Hlorka!',
-          component: SearchPage,
+          component: Home,
         }}/>
     );
   }

@@ -41,7 +41,7 @@ var styles = StyleSheet.create({
   }
 });
 
-class PropertyView extends Component {
+class GameView extends Component {
 
   render() {
     var game = this.props.game;
@@ -58,4 +58,4 @@ class PropertyView extends Component {
   }
 }
 
-module.exports = PropertyView;
+module.exports = GameView;

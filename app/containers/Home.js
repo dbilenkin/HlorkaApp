@@ -11,7 +11,7 @@ import {
   Image
 } from 'react-native';
 
-var SearchResults = require('./SearchResults');
+var Games = require('./Games');
 
 var styles = StyleSheet.create({
   description: {
@@ -69,7 +69,7 @@ function urlForQueryAndPage(key, value, pageNumber) {
   return 'http://localhost:8090/api/games';
 };
 
-class SearchPage extends Component {
+class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -107,7 +107,7 @@ class SearchPage extends Component {
     if (response) {
       this.props.navigator.push({
         title: this.state.searchString,
-        component: SearchResults,
+        component: Games,
         passProps: {games: response, name: this.state.searchString}
       });
     } else {
@@ -155,4 +155,4 @@ class SearchPage extends Component {
   }
 }
 
-module.exports = SearchPage;
+module.exports = Home;
