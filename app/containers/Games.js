@@ -1,9 +1,7 @@
 'use strict';
 
-import React, { Component } from 'react'
-import SocketIOClient from 'socket.io-client';
-import SockJS from 'sockjs-client';
-import Stomp from 'stompjs';
+import React, { Component } from 'react';
+import WebSocket from '../lib/socket';
 import {
   StyleSheet,
   Image,
@@ -84,8 +82,6 @@ class Games extends Component {
 
   constructor(props) {
     super(props);
-    var socket = new SockJS('http://localhost:8090/websocket/tracker');
-    this.stompClient = Stomp.over(socket);
 
     var dataSource = new ListView.DataSource(
       {rowHasChanged: (r1, r2) => r1.id !== r2.id});
@@ -115,16 +111,19 @@ class Games extends Component {
     //var stompClient = new Stomp('localhost', 8080);
     console.log("componentDidMount");
     var self = this;
-    this.stompClient.connect({},function(sessionId) {
-        self.stompClient.subscribe('/topic/addGame', function(response) {
-          console.log('This is the body of a message on the subscribed queue:', response);
-          self._addGame(response.body);
-        });
+    this.addGameSubscription = WebSocket.subscribe('/topic/addGame', function(response) {
+      console.log('This is the body of a message on the subscribed queue:', response);
+      self._addGame(response.body);
+    });
 
-        self.stompClient.subscribe('/topic/deleteGame', function(response) {
-          console.log('This is the body of a message on the subscribed queue:', response);
-          self._deleteGame(response.body);
-        });
+    this.deleteGameSubscription = WebSocket.subscribe('/topic/deleteGame', function(response) {
+      console.log('This is the body of a message on the subscribed queue:', response);
+      self._deleteGame(response.body);
+    });
+
+    this.joinGameSubscription = WebSocket.subscribe('/topic/joinGame', function(response) {
+      console.log('This is the body of a message on the subscribed queue:', response);
+      self._joinGame(response.body);
     });
 
 
@@ -132,26 +131,38 @@ class Games extends Component {
 
   componentWillUnmount() {
     console.log("componentWillUnmount");
-    this.stompClient.disconnect();
+    this.addGameSubscription.unsubscribe();
+    this.deleteGameSubscription.unsubscribe();
+    this.joinGameSubscription.unsubscribe();
+  }
+
+  _joinGame(body) {
+    var game = JSON.parse(body);
+
+    this.props.navigator.push({
+      title: "Game",
+      component: GameView,
+      passProps: {game: game}
+    });
   }
 
   _addGame(body) {
     var game = JSON.parse(body);
-    this.state.games = this.state.games.concat([game])
+    var games = this.state.games.concat([game])
     this.setState({
-      dataSource: this.state.dataSource.cloneWithRows(this.state.games),
+      dataSource: this.state.dataSource.cloneWithRows(games),
       name: this.props.name,
-      games: this.state.games
+      games: games
     });
   }
 
   _deleteGame(body) {
     var game = JSON.parse(body);
-    this.state.games = this.state.games.filter(el => el.id != game.id);
+    var games = this.state.games.filter(el => el.id != game.id);
     this.setState({
-      dataSource: this.state.dataSource.cloneWithRows(this.state.games),
+      dataSource: this.state.dataSource.cloneWithRows(games),
       name: this.props.name,
-      games: this.state.games
+      games: games
     });
   }
 
@@ -188,7 +199,7 @@ class Games extends Component {
     })
     .then(function(response) {
       if (response.ok) {
-        self.rowPressed(id);
+        console.log("joinGame response");
       } else {
         console.log("Whoopsie Daisy!");
         self._errorModal.setModalVisible(true);
@@ -225,17 +236,6 @@ class Games extends Component {
         </View>
 
     );
-  }
-
-  rowPressed(id) {
-    var name = this.props.name;
-    var game = this.props.games.filter(prop => prop.id === id)[0];
-
-    this.props.navigator.push({
-      title: "Game",
-      component: GameView,
-      passProps: {game: game}
-    });
   }
 
   render() {

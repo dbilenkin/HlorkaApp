@@ -8,6 +8,8 @@ import {
   Text
 } from 'react-native';
 
+import WebSocket from '../lib/socket';
+
 var styles = StyleSheet.create({
   container: {
     marginTop: 65
@@ -42,6 +44,16 @@ var styles = StyleSheet.create({
 });
 
 class GameView extends Component {
+
+  componentDidMount() {
+
+    //var stompClient = new Stomp('localhost', 8080);
+    console.log("componentDidMount");
+    var self = this;
+    
+
+
+  }
 
   render() {
     var game = this.props.game;
